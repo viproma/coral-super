@@ -1,0 +1,33 @@
+diff -r 8ca6b46cc751 man/CMakeLists.txt
+--- a/man/CMakeLists.txt	Fri Feb 19 15:23:27 2016 +0100
++++ b/man/CMakeLists.txt	Wed Apr 20 16:16:49 2016 +0100
+@@ -92,11 +92,11 @@
+ STRING(REGEX REPLACE .mdoc "" MAN3_PAGES "${MDOC3_PAGES}")
+ SET(MAN_PAGES ${MAN1_PAGES} ${MAN3_PAGES})
+ 
+-IF(CMAKE_SYSTEM_NAME MATCHES BSD)
++#IF(CMAKE_SYSTEM_NAME MATCHES BSD)
+   SET(MANFMT mdoc)
+-ELSE(CMAKE_SYSTEM_NAME MATCHES BSD)
+-  SET(MANFMT man)
+-ENDif(CMAKE_SYSTEM_NAME MATCHES BSD)
++#ELSE(CMAKE_SYSTEM_NAME MATCHES BSD)
++#  SET(MANFMT man)
++#ENDif(CMAKE_SYSTEM_NAME MATCHES BSD)
+ 
+ # installation
+ 
+diff -r 8ca6b46cc751 src/ziptool.c
+--- a/src/ziptool.c	Fri Feb 19 15:23:27 2016 +0100
++++ b/src/ziptool.c	Wed Apr 20 16:16:49 2016 +0100
+@@ -53,6 +53,10 @@
+ #include "zip.h"
+ #include "compat.h"
+ 
++#if defined(_MSC_VER) && (_MSC_VER < 1900)
++#define snprintf _snprintf
++#endif
++
+ zip_source_t *source_hole_create(const char *, int flags, zip_error_t *);
+ 
+ typedef enum {
