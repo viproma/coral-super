@@ -15,15 +15,80 @@ endif()
 set(INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH
     "The directory to which all external projects will be installed")
 
-set (BOOST_INCLUDEDIR "${BOOST_INCLUDEDIR}" CACHE PATH
-    "The preferred Boost include directory (e.g. <prefix>/include)")
-set (BOOST_LIBRARYDIR "${BOOST_LIBRARYDIR}" CACHE PATH
-    "The preferred Boost library directory (e.g. <prefix>/lib)")
-if ((NOT BOOST_INCLUDEDIR) OR (NOT BOOST_LIBRARYDIR))
-    message("The variable(s) BOOST_INCLUDEDIR and/or BOOST_LIBRARYDIR were not defined. If they are, they will be passed on to the CMake scripts of subprojects that need them.")
-endif ()
-
 include(ExternalProject)
+
+
+# ==============================================================================
+# Boost
+# ==============================================================================
+
+if(MSVC)
+    option(DOWNLOAD_BOOST
+        "Download prebuilt Boost binaries for Microsoft Visual Studio (warning: big download)"
+        OFF)
+else()
+    set(DOWNLOAD_BOOST OFF)
+endif()
+
+set(boostIncludeDirDocstring "The preferred Boost include directory (e.g. <prefix>/include)")
+set(boostLibraryDirDocstring "The preferred Boost library directory (e.g. <prefix>/lib)")
+if(DOWNLOAD_BOOST)
+    set(boostDependency "boost")
+    if(MSVC12)
+        set(msvcVer "12.0")
+    elseif(MSVC14)
+        set(msvcVer "14.0")
+    else()
+        message(FATAL_ERROR "Unsupported MSVC version for Boost download")
+    endif()
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(wordSize "64")
+    else()
+        set(wordSize "32")
+    endif()
+    set(boostStem "boost_1_60_0")
+
+    ExternalProject_Add(boost
+        URL "http://marin-ikt.sintef.no/projects/viproma/downloads/${boostStem}-msvc-${msvcVer}-32-64.tar.gz"
+        SOURCE_DIR "${INSTALL_PREFIX}/${boostStem}"
+        BINARY_DIR "${INSTALL_PREFIX}/${boostStem}"
+        INSTALL_DIR "${INSTALL_PREFIX}/${boostStem}"
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+    )
+    set(BOOST_INCLUDEDIR "${INSTALL_PREFIX}/${boostStem}"
+        CACHE PATH "${boostIncludeDirDocstring}" FORCE)
+    set(BOOST_LIBRARYDIR "${INSTALL_PREFIX}/${boostStem}/lib${wordSize}-msvc-${msvcVer}"
+        CACHE PATH "${boostLibraryDirDocstring}" FORCE)
+else()
+    set(boostDependency)
+    set(BOOST_INCLUDEDIR ""
+        CACHE PATH "${boostIncludeDirDocstring}")
+    set(BOOST_LIBRARYDIR ""
+        CACHE PATH "${boostLibraryDirDocstring}")
+endif()
+
+if((NOT BOOST_INCLUDEDIR) OR (NOT BOOST_LIBRARYDIR))
+    message("The variable(s) BOOST_INCLUDEDIR and/or BOOST_LIBRARYDIR were not defined. If they are, they will be passed on to the CMake scripts of subprojects that need them.")
+endif()
+
+unset(boostCMakeArgs)
+if(BOOST_INCLUDEDIR)
+    list(APPEND boostCMakeArgs "-DBOOST_INCLUDEDIR:PATH=${BOOST_INCLUDEDIR}")
+else()
+    message("The variable BOOST_INCLUDEDIR was not defined. If it is, it will be passed on to the CMake scripts of subprojects that depend on Boost.")
+endif()
+if(BOOST_LIBRARYDIR)
+    list(APPEND boostCMakeArgs "-DBOOST_LIBRARYDIR:PATH=${BOOST_LIBRARYDIR}")
+else()
+    message("The variable BOOST_LIBRARYDIR was not defined. If it is, it will be passed on to the CMake scripts of subprojects that depend on Boost.")
+endif()
+
+
+# ==============================================================================
+# Other dependencies
+# ==============================================================================
 
 ExternalProject_Add(zlib
     GIT_REPOSITORY "https://github.com/madler/zlib.git"
@@ -75,6 +140,11 @@ ExternalProject_Add(zmq
     INSTALL_DIR "${INSTALL_PREFIX}"
 )
 
+
+# ==============================================================================
+# DSB
+# ==============================================================================
+
 if (WIN32)
     set(libprotobuf "libprotobuf.lib")
     set(libprotobufd "libprotobufd.lib")
@@ -85,12 +155,11 @@ endif()
 
 ExternalProject_Add(dsb
     GIT_REPOSITORY "${DSB_GIT_REPOSITORY}"
-    DEPENDS "libzip" "fmilib" "protobuf" "zmq"
+    DEPENDS "libzip" "fmilib" "protobuf" "zmq" ${boostDependency}
     CMAKE_ARGS
         "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
         "-DDSB_BUILD_PRIVATE_API_DOCS:BOOL=ON"
-        "-DBOOST_INCLUDEDIR=${BOOST_INCLUDEDIR}"
-        "-DBOOST_LIBRARYDIR=${BOOST_LIBRARYDIR}"
+        ${boostCMakeArgs}
         "-DPROTOBUF_LIBRARY=${INSTALL_PREFIX}/lib/${libprotobuf}"
         "-DPROTOBUF_LIBRARY_DEBUG=${INSTALL_PREFIX}/lib/${libprotobufd}"
     INSTALL_DIR "${INSTALL_PREFIX}"
@@ -105,8 +174,7 @@ if (BUILD_JDSB)
         DEPENDS "dsb"
         CMAKE_ARGS
             "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
-            "-DBOOST_INCLUDEDIR=${BOOST_INCLUDEDIR}"
-            "-DBOOST_LIBRARYDIR=${BOOST_LIBRARYDIR}"
+            ${boostCMakeArgs}
             "-DPROTOBUF_LIBRARY=${INSTALL_PREFIX}/lib/${libprotobuf}"
             "-DPROTOBUF_LIBRARY_DEBUG=${INSTALL_PREFIX}/lib/${libprotobufd}"
         INSTALL_DIR "${INSTALL_PREFIX}"
