@@ -36,8 +36,10 @@ if(DOWNLOAD_BOOST)
     set(boostDependency "boost")
     if(MSVC12)
         set(msvcVer "12.0")
+        set(boostDownloadMD5 "b77904a3080b99b697d7eeb62582f73d")
     elseif(MSVC14)
         set(msvcVer "14.0")
+        set(boostDownloadMD5 "44c64d563abb6934f152b4c9195d9532")
     else()
         message(FATAL_ERROR "Unsupported MSVC version for Boost download")
     endif()
@@ -53,6 +55,7 @@ if(DOWNLOAD_BOOST)
         SOURCE_DIR "${INSTALL_PREFIX}/${boostStem}"
         BINARY_DIR "${INSTALL_PREFIX}/${boostStem}"
         INSTALL_DIR "${INSTALL_PREFIX}/${boostStem}"
+        URL_MD5 "${boostDownloadMD5}"
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
         INSTALL_COMMAND ""
