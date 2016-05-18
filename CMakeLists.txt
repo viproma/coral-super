@@ -60,9 +60,10 @@ if(DOWNLOAD_BOOST)
         BUILD_COMMAND ""
         INSTALL_COMMAND ""
     )
-    set(BOOST_INCLUDEDIR "${INSTALL_PREFIX}/${boostStem}"
+    ExternalProject_Get_Property(boost INSTALL_DIR)
+    set(BOOST_INCLUDEDIR "${INSTALL_DIR}"
         CACHE PATH "${boostIncludeDirDocstring}" FORCE)
-    set(BOOST_LIBRARYDIR "${INSTALL_PREFIX}/${boostStem}/lib${wordSize}-msvc-${msvcVer}"
+    set(BOOST_LIBRARYDIR "${INSTALL_DIR}/lib${wordSize}-msvc-${msvcVer}"
         CACHE PATH "${boostLibraryDirDocstring}" FORCE)
 else()
     set(boostDependency)
