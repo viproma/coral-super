@@ -106,7 +106,8 @@ ExternalProject_Add(libzip
     HG_REPOSITORY "http://hg.nih.at/libzip"
     HG_TAG "rel-1-1-2"
     PATCH_COMMAND "hg" "revert" "."
-          COMMAND "hg" "import" "${CMAKE_SOURCE_DIR}/patches/libzip.patch" "--no-commit"
+          COMMAND "hg" "import" "${CMAKE_SOURCE_DIR}/patches/libzip.patch"
+            "--config" "patch.eol=auto" "--no-commit"
     CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
     INSTALL_DIR "${INSTALL_PREFIX}"
 )
