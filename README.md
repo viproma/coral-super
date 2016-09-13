@@ -1,21 +1,48 @@
-DSB development environment
-===========================
-This repository contains a CMake script which downloads and builds DSB *and
-its dependencies* in just a few simple steps.  It achieves this by using
-CMake's ExternalProject module.  You are still required to manually download
-and install some tools and dependencies, though:
+DSB "super-project"
+===================
+This repository contains [CMake](https://cmake.org) scripts for downloading,
+building and packaging DSB and (almost) all of its dependencies in just a
+few simple steps.
 
-  * Git (to check out this repository and others)
+Specifically, there are two scripts:
+
+  * `CMakeLists.txt`, for downloading and building the code using CMake in
+    the "normal mode".
+  * `make-release.cmake`, for bundling DSB and its runtime dependencies into
+    a release package.  This must be run by CMake in "script mode"
+
+The latter will, unless otherwise is specified by the user, automatically
+run the former in a temporary working directory.
+
+
+Requirements
+------------
+The CMake "super build system" described by `CMakeLists.txt` automatically
+downloads and builds DSB and its dependencies by using CMake's
+[ExternalProject](https://cmake.org/cmake/help/v3.0/module/ExternalProject.html)
+module.  For this to work, some tools must already be installed on your system:
+
   * CMake (3.0 or later)
-  * Mercurial (required by dependencies)
-  * Subversion (required by dependencies)
-  * Boost (not covered by this script because it's so friggin' big)
+  * [Git](https://git-scm.com/)
+  * [Mercurial](https://www.mercurial-scm.org/) (required by dependencies)
+  * [Subversion](https://subversion.apache.org/) (required by dependencies)
+  * [Boost](http://www.boost.org/) (can be downloaded automatically for Visual
+    Studio; see below)
   * Java Development Kit (only required if you want to build JDSB, which
     is not done by default)
 
+The `make-release.cmake` script has no further *mandatory* dependencies of
+its own, but if you want it to create a ZIP file, you also need the Zip
+program by [Info-ZIP](http://www.info-zip.org/).
 
-Step-by-step procedure
-----------------------
+
+Downloading and building
+------------------------
+
+The rest of this document describes how to use the `CMakeLists.txt` script,
+which is what you probably want to do if you plan to participate in DSB
+development.  If all you want is to *build* DSB and create a release bundle,
+check out the comments at the top of [`make-release.cmake`](make-release.cmake).
 
   1. Clone this repository locally.  Hereafter, we refer to the topmost
      directory of the cloned repository as `SOURCE_DIR`.
@@ -36,4 +63,23 @@ Step-by-step procedure
 
 Options and variables
 ---------------------
-(To be added)
+
+The following variables may be defined on the CMake command line, by using
+options on the form `-DVAR=value`.
+
+  * `DSB_GIT_REPOSITORY`: The Git repository to use for DSB.  If you intend
+    to participate in DSB development, this should probably be your own
+    fork of the main repository.  If not specified, this will point to
+    the main repository.
+
+  * `DSB_GIT_TAG`: Which branch, tag or commit ID to check out from the DSB
+    repository.  By default, this is `master`.
+
+  * `DOWNLOAD_BOOST`: Whether pre-built Boost libraries should be downloaded
+    from a SINTEF server.  This only works for Visual Studio builds, and by
+    default it is `OFF`.
+
+  * `BOOST_INCLUDEDIR` and `BOOST_LIBRARYDIR`: These are forwarded to CMake's
+    `FindBoost` script.  Run `cmake --help-module=FindBoost` for more info.
+    If `DOWNLOAD_BOOST` is `ON`, these are set automatically.
+
