@@ -12,8 +12,14 @@ if(DSB_GIT_REPOSITORY STREQUAL DSB_MAIN_GIT_REPOSITORY)
         "The DSB_GIT_REPOSITORY currently points to the main DSB repository. If you plan to develop DSB and submit pull requests, you should change it so that it points to your personal fork.")
 endif()
 
-set(INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH
-    "The directory to which all external projects will be installed")
+set(DSB_GIT_TAG "master" CACHE STRING
+    "The Git branch name, commit ID or tag to use when checking out DSB")
+
+set(INSTALL_DIR "${CMAKE_BINARY_DIR}/install" CACHE PATH
+    "The directory under which all external projects will be installed")
+set(depsInstallPrefix "${INSTALL_DIR}/dependencies")
+set(dsbInstallPrefix "${INSTALL_DIR}/dsb")
+set(jdsbInstallPrefix "${INSTALL_DIR}/jdsb")
 
 include(ExternalProject)
 
@@ -52,9 +58,9 @@ if(DOWNLOAD_BOOST)
 
     ExternalProject_Add(boost
         URL "http://marin-ikt.sintef.no/projects/viproma/downloads/${boostStem}-msvc-${msvcVer}-32-64.tar.gz"
-        SOURCE_DIR "${INSTALL_PREFIX}/${boostStem}"
-        BINARY_DIR "${INSTALL_PREFIX}/${boostStem}"
-        INSTALL_DIR "${INSTALL_PREFIX}/${boostStem}"
+        SOURCE_DIR "${depsInstallPrefix}/${boostStem}"
+        BINARY_DIR "${depsInstallPrefix}/${boostStem}"
+        INSTALL_DIR "${depsInstallPrefix}/${boostStem}"
         URL_MD5 "${boostDownloadMD5}"
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
@@ -97,8 +103,8 @@ endif()
 ExternalProject_Add(zlib
     GIT_REPOSITORY "https://github.com/madler/zlib.git"
     GIT_TAG "v1.2.8"
-    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
-    INSTALL_DIR "${INSTALL_PREFIX}"
+    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:PATH=${depsInstallPrefix}"
+    INSTALL_DIR "${depsInstallPrefix}"
 )
 
 ExternalProject_Add(libzip
@@ -108,19 +114,19 @@ ExternalProject_Add(libzip
     PATCH_COMMAND "hg" "revert" "."
           COMMAND "hg" "import" "${CMAKE_SOURCE_DIR}/patches/libzip.patch"
             "--config" "patch.eol=auto" "--no-commit"
-    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
-    INSTALL_DIR "${INSTALL_PREFIX}"
+    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:PATH=${depsInstallPrefix}"
+    INSTALL_DIR "${depsInstallPrefix}"
 )
 
 ExternalProject_Add(fmilib
     SVN_REPOSITORY "https://svn.jmodelica.org/FMILibrary/tags/2.0.1"
     CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
-        "-DFMILIB_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
+        "-DCMAKE_INSTALL_PREFIX:PATH=${depsInstallPrefix}"
+        "-DFMILIB_INSTALL_PREFIX:PATH=${depsInstallPrefix}"
         "-DFMILIB_BUILD_SHARED_LIB:BOOL=ON"
         "-DFMILIB_BUILD_STATIC_LIB:BOOL=OFF"
         "-DFMILIB_BUILD_TESTS:BOOL=OFF"
-    INSTALL_DIR "${INSTALL_PREFIX}"
+    INSTALL_DIR "${depsInstallPrefix}"
 )
 
 ExternalProject_Add(protobuf
@@ -130,19 +136,19 @@ ExternalProject_Add(protobuf
         "${CMAKE_SOURCE_DIR}/patches/protobuf/CMakeLists.txt"
         "${CMAKE_BINARY_DIR}/protobuf-prefix/src/protobuf/"
     CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
+        "-DCMAKE_INSTALL_PREFIX:PATH=${depsInstallPrefix}"
         "-Dprotobuf_BUILD_TESTS:BOOL=OFF"
         "-Dprotobuf_MSVC_STATIC_RUNTIME=OFF"
-    INSTALL_DIR "${INSTALL_PREFIX}"
+    INSTALL_DIR "${depsInstallPrefix}"
 )
 
 ExternalProject_Add(zmq
     GIT_REPOSITORY "https://github.com/zeromq/zeromq4-1.git"
     CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
+        "-DCMAKE_INSTALL_PREFIX:PATH=${depsInstallPrefix}"
         "-DWITH_LIBSODIUM:BOOL=OFF"
         "-DZMQ_BUILD_TESTS:BOOL=OFF"
-    INSTALL_DIR "${INSTALL_PREFIX}"
+    INSTALL_DIR "${depsInstallPrefix}"
 )
 
 
@@ -160,14 +166,16 @@ endif()
 
 ExternalProject_Add(dsb
     GIT_REPOSITORY "${DSB_GIT_REPOSITORY}"
+    GIT_TAG "${DSB_GIT_TAG}"
     DEPENDS "libzip" "fmilib" "protobuf" "zmq" ${boostDependency}
     CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
+        "-DCMAKE_INSTALL_PREFIX:PATH=${dsbInstallPrefix}"
+        "-DCMAKE_PREFIX_PATH=${depsInstallPrefix}"
         "-DDSB_BUILD_PRIVATE_API_DOCS:BOOL=ON"
         ${boostCMakeArgs}
-        "-DPROTOBUF_LIBRARY=${INSTALL_PREFIX}/lib/${libprotobuf}"
-        "-DPROTOBUF_LIBRARY_DEBUG=${INSTALL_PREFIX}/lib/${libprotobufd}"
-    INSTALL_DIR "${INSTALL_PREFIX}"
+        "-DPROTOBUF_LIBRARY=${depsInstallPrefix}/lib/${libprotobuf}"
+        "-DPROTOBUF_LIBRARY_DEBUG=${depsInstallPrefix}/lib/${libprotobufd}"
+    INSTALL_DIR "${dsbInstallPrefix}"
 )
 
 
@@ -178,11 +186,12 @@ if (BUILD_JDSB)
         GIT_REPOSITORY "ssh://git@git.code.sintef.no/vista/jdsb.git"
         DEPENDS "dsb"
         CMAKE_ARGS
-            "-DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PREFIX}"
+            "-DCMAKE_INSTALL_PREFIX:PATH=${jdsbInstallPrefix}"
+            "-DCMAKE_PREFIX_PATH=${depsInstallPrefix};${dsbInstallPrefix}"
             ${boostCMakeArgs}
-            "-DPROTOBUF_LIBRARY=${INSTALL_PREFIX}/lib/${libprotobuf}"
-            "-DPROTOBUF_LIBRARY_DEBUG=${INSTALL_PREFIX}/lib/${libprotobufd}"
-        INSTALL_DIR "${INSTALL_PREFIX}"
+            "-DPROTOBUF_LIBRARY=${depsInstallPrefix}/lib/${libprotobuf}"
+            "-DPROTOBUF_LIBRARY_DEBUG=${depsInstallPrefix}/lib/${libprotobufd}"
+        INSTALL_DIR "${jdsbInstallPrefix}"
         INSTALL_COMMAND "" # JDSB currently doesn't have an install step
     )
 endif()
