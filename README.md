@@ -1,14 +1,14 @@
-DSB "super-project"
-===================
+Coral "super-project"
+=====================
 This repository contains [CMake](https://cmake.org) scripts for downloading,
-building and packaging DSB and (almost) all of its dependencies in just a
+building and packaging Coral and (almost) all of its dependencies in just a
 few simple steps.
 
 Specifically, there are two scripts:
 
   * `CMakeLists.txt`, for downloading and building the code using CMake in
     the "normal mode".
-  * `make-release.cmake`, for bundling DSB and its runtime dependencies into
+  * `make-release.cmake`, for bundling Coral and its runtime dependencies into
     a release package.  This must be run by CMake in "script mode"
 
 The latter will, unless otherwise is specified by the user, automatically
@@ -18,7 +18,7 @@ run the former in a temporary working directory.
 Requirements
 ------------
 The CMake "super build system" described by `CMakeLists.txt` automatically
-downloads and builds DSB and its dependencies by using CMake's
+downloads and builds Coral and its dependencies by using CMake's
 [ExternalProject](https://cmake.org/cmake/help/v3.0/module/ExternalProject.html)
 module.  For this to work, some tools must already be installed on your system:
 
@@ -40,8 +40,8 @@ Downloading and building
 ------------------------
 
 The rest of this document describes how to use the `CMakeLists.txt` script,
-which is what you probably want to do if you plan to participate in DSB
-development.  If all you want is to *build* DSB and create a release bundle,
+which is what you probably want to do if you plan to participate in Coral
+development.  If all you want is to *build* Coral and create a release bundle,
 check out the comments at the top of [`make-release.cmake`](make-release.cmake).
 
   1. Clone this repository locally.  Hereafter, we refer to the topmost
@@ -67,12 +67,12 @@ Options and variables
 The following variables may be defined on the CMake command line, by using
 options on the form `-DVAR=value`.
 
-  * `DSB_GIT_REPOSITORY`: The Git repository to use for DSB.  If you intend
-    to participate in DSB development, this should probably be your own
+  * `CORAL_GIT_REPOSITORY`: The Git repository to use for Coral.  If you intend
+    to participate in Coral development, this should probably be your own
     fork of the main repository.  If not specified, this will point to
     the main repository.
 
-  * `DSB_GIT_TAG`: Which branch, tag or commit ID to check out from the DSB
+  * `CORAL_GIT_TAG`: Which branch, tag or commit ID to check out from the Coral
     repository.  By default, this is `master`.
 
   * `DOWNLOAD_BOOST`: Whether pre-built Boost libraries should be downloaded

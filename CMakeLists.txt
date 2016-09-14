@@ -164,7 +164,7 @@ else()
     set(libprotobufd "libprotobufd.a")
 endif()
 
-ExternalProject_Add(dsb
+ExternalProject_Add(coral
     GIT_REPOSITORY "${CORAL_GIT_REPOSITORY}"
     GIT_TAG "${CORAL_GIT_TAG}"
     DEPENDS "libzip" "fmilib" "protobuf" "zmq" ${boostDependency}
@@ -184,7 +184,7 @@ option (BUILD_JDSB "Build JDSB too" OFF)
 if (BUILD_JDSB)
     ExternalProject_Add(jdsb
         GIT_REPOSITORY "ssh://git@git.code.sintef.no/vista/jdsb.git"
-        DEPENDS "dsb"
+        DEPENDS "coral"
         CMAKE_ARGS
             "-DCMAKE_INSTALL_PREFIX:PATH=${jdsbInstallPrefix}"
             "-DCMAKE_PREFIX_PATH=${depsInstallPrefix};${coralInstallPrefix}"
