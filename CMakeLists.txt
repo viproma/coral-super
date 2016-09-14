@@ -1,24 +1,24 @@
-# This file defines a "super project" which downloads and builds all DSB
-# dependencies before finally setting up DSB itself.
+# This file defines a "super project" which downloads and builds all Coral
+# dependencies before finally setting up Coral itself.
 cmake_minimum_required(VERSION 3.3.0)
-project("dsb-env")
+project("coral-super")
 
-set(DSB_MAIN_GIT_REPOSITORY "ssh://git@git.code.sintef.no/viproma/dsb.git")
+set(CORAL_MAIN_GIT_REPOSITORY "ssh://git@git.code.sintef.no/viproma/coral.git")
 
-set(DSB_GIT_REPOSITORY "${DSB_MAIN_GIT_REPOSITORY}" CACHE STRING
-    "The DSB repository URL. If you plan to develop DSB and submit pull requests, this should refer to your personal fork")
-if(DSB_GIT_REPOSITORY STREQUAL DSB_MAIN_GIT_REPOSITORY)
+set(CORAL_GIT_REPOSITORY "${CORAL_MAIN_GIT_REPOSITORY}" CACHE STRING
+    "The Coral repository URL. If you plan to develop Coral and submit pull requests, this should refer to your personal fork")
+if(CORAL_GIT_REPOSITORY STREQUAL CORAL_MAIN_GIT_REPOSITORY)
     message(WARNING
-        "The DSB_GIT_REPOSITORY currently points to the main DSB repository. If you plan to develop DSB and submit pull requests, you should change it so that it points to your personal fork.")
+        "CORAL_GIT_REPOSITORY currently points to the main Coral repository. If you plan to develop Coral and submit pull requests, you should change it so that it points to your personal fork.")
 endif()
 
-set(DSB_GIT_TAG "master" CACHE STRING
-    "The Git branch name, commit ID or tag to use when checking out DSB")
+set(CORAL_GIT_TAG "master" CACHE STRING
+    "The Git branch name, commit ID or tag to use when checking out Coral")
 
 set(INSTALL_DIR "${CMAKE_BINARY_DIR}/install" CACHE PATH
     "The directory under which all external projects will be installed")
 set(depsInstallPrefix "${INSTALL_DIR}/dependencies")
-set(dsbInstallPrefix "${INSTALL_DIR}/dsb")
+set(coralInstallPrefix "${INSTALL_DIR}/coral")
 set(jdsbInstallPrefix "${INSTALL_DIR}/jdsb")
 
 include(ExternalProject)
@@ -153,7 +153,7 @@ ExternalProject_Add(zmq
 
 
 # ==============================================================================
-# DSB
+# Coral
 # ==============================================================================
 
 if (WIN32)
@@ -165,17 +165,17 @@ else()
 endif()
 
 ExternalProject_Add(dsb
-    GIT_REPOSITORY "${DSB_GIT_REPOSITORY}"
-    GIT_TAG "${DSB_GIT_TAG}"
+    GIT_REPOSITORY "${CORAL_GIT_REPOSITORY}"
+    GIT_TAG "${CORAL_GIT_TAG}"
     DEPENDS "libzip" "fmilib" "protobuf" "zmq" ${boostDependency}
     CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX:PATH=${dsbInstallPrefix}"
+        "-DCMAKE_INSTALL_PREFIX:PATH=${coralInstallPrefix}"
         "-DCMAKE_PREFIX_PATH=${depsInstallPrefix}"
-        "-DDSB_BUILD_PRIVATE_API_DOCS:BOOL=ON"
+        "-DCORAL_BUILD_PRIVATE_API_DOCS:BOOL=ON"
         ${boostCMakeArgs}
         "-DPROTOBUF_LIBRARY=${depsInstallPrefix}/lib/${libprotobuf}"
         "-DPROTOBUF_LIBRARY_DEBUG=${depsInstallPrefix}/lib/${libprotobufd}"
-    INSTALL_DIR "${dsbInstallPrefix}"
+    INSTALL_DIR "${coralInstallPrefix}"
 )
 
 
@@ -187,7 +187,7 @@ if (BUILD_JDSB)
         DEPENDS "dsb"
         CMAKE_ARGS
             "-DCMAKE_INSTALL_PREFIX:PATH=${jdsbInstallPrefix}"
-            "-DCMAKE_PREFIX_PATH=${depsInstallPrefix};${dsbInstallPrefix}"
+            "-DCMAKE_PREFIX_PATH=${depsInstallPrefix};${coralInstallPrefix}"
             ${boostCMakeArgs}
             "-DPROTOBUF_LIBRARY=${depsInstallPrefix}/lib/${libprotobuf}"
             "-DPROTOBUF_LIBRARY_DEBUG=${depsInstallPrefix}/lib/${libprotobufd}"
