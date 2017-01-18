@@ -1,6 +1,6 @@
 # This file defines a "super project" which downloads and builds all Coral
 # dependencies before finally setting up Coral itself.
-cmake_minimum_required(VERSION 3.3.0)
+cmake_minimum_required(VERSION 3.0.0)
 project("coral-super")
 
 set(CORAL_MAIN_GIT_REPOSITORY "ssh://git@git.code.sintef.no/viproma/coral.git")
