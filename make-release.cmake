@@ -1,4 +1,4 @@
-# This script creates a release bundle in the form of a ZIP file.
+# This script creates a release bundle.
 #
 # USAGE
 #
@@ -7,13 +7,15 @@
 # Note that the -P switch that specifies the script file MUST come after the
 # -D switches that define variables.
 #
-# In its final step, creating the zip file, the script requires that the
-# 'zip' program by Info-ZIP is in the PATH environment variable.  On Linux,
-# this is often the case already, and if not, it can be easily installed
-# through most distributions' package management systems.  On Windows, one
-# can use Cygwin or download the program from http://www.info-zip.org.
-# Alternatively, this step can be disabled by setting the 'createZip'
-# variable to FALSE.
+# In its final step, creating the package file, the script requires that the
+# appropriate programs are in the executable search path (PATH).  For the "zip"
+# packager this is the Info-ZIP archiver, for "tar" it is, well, tar, and for
+# "tgz" and "tbz" it is tar in conjunction with gzip or bzip2, respectively.
+# On Linux, these programs are often installed by default, and if not, they can
+# easily be installed through most distributions' package management systems.
+# On Windows, one can use Cygwin or download Info-ZIP from
+# http://www.info-zip.org.  Alternatively, this step can be disabled entirely
+# by setting the 'packager' variable to "none".
 #
 # The release bundles will be placed in the "releases" directory.
 #
@@ -37,7 +39,9 @@
 #                       multi-configuration generators it is used in the build
 #                       step.
 #
-#   createZip           Whether to create a ZIP file.  This is ON by default.
+#   packager            How (and whether) to package the files. May be "zip",
+#                       "tar", "tgz", "tbz" or "none". The default is "zip" on
+#                       Windows and "tgz" on *NIX.
 #
 #   generator           Which CMake generator to use.  Ignored if 'binaryDir'
 #                       is given.
@@ -129,25 +133,55 @@ executeProcess("${CMAKE_COMMAND}"
 
 set(targetDir "${releaseDir}/${baseName}")
 if(WIN32)
+    set(dlDir "bin")
     set(dlExt ".dll")
     set(exeExt ".exe")
 else()
-    set(dlExt ".so")
+    set(dlDir "lib")
+    set(dlExt ".so*")
     set(exeExt "")
 endif()
 
 # Copy Coral files
-file(INSTALL "${binaryDir}/install/coral/" DESTINATION "${targetDir}")
+file(INSTALL "${binaryDir}/install/coral/"
+    DESTINATION "${targetDir}"
+    USE_SOURCE_PERMISSIONS)
 
 # Copy runtime dependencies
 set(depsDir "${binaryDir}/install/dependencies")
 file(GLOB dlDeps "${depsDir}/bin/*${dlExt}" "${depsDir}/lib/*${dlExt}")
-file(INSTALL ${dlDeps} DESTINATION "${targetDir}/bin")
+file(INSTALL ${dlDeps}
+    DESTINATION "${targetDir}/${dlDir}"
+    USE_SOURCE_PERMISSIONS)
 
-# Create the ZIP file
-if(createZip OR NOT DEFINED createZip)
+# Package the files
+if((NOT DEFINED packager) OR (packager STREQUAL ""))
+    if(WIN32)
+        set(packager "zip")
+    else()
+        set(packager "tgz")
+    endif()
+endif()
+
+if(packager STREQUAL "zip")
     executeProcess("zip" "-r" "${baseName}.zip" "${baseName}"
         WORKING_DIRECTORY "${releaseDir}")
+elseif((packager STREQUAL "tar") OR (packager STREQUAL "tgz") OR (packager STREQUAL "tbz"))
+    if(packager STREQUAL "tgz")
+        set(tarCompression "-z")
+        set(tarSuffix ".gz")
+    elseif(packager STREQUAL "tbz")
+        set(tarCompression "-j")
+        set(tarSuffix ".bz2")
+    else()
+        set(tarCompression)
+        set(tarSuffix)
+    endif()
+    executeProcess(
+        "tar" "-c" "-v" ${tarCompression} "-f" "${baseName}.tar${tarSuffix}" "${baseName}"
+        WORKING_DIRECTORY "${releaseDir}")
+elseif(packager STREQUAL "none")
+    message(STATUS "packager is 'none'; packaging skipped")
 else()
-    message(STATUS "createZip is OFF; ZIP file creation skipped.")
+    message(SEND_ERROR "'${packager}' is not a valid packager; packaging skipped")
 endif()
