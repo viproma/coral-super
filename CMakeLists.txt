@@ -107,14 +107,31 @@ ExternalProject_Add(zlib
     INSTALL_DIR "${depsInstallPrefix}"
 )
 
+# libzip must be built using autotools on Linux
+if(WIN32)
+    set(libzipSteps
+        CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:PATH=${depsInstallPrefix}"
+    )
+else()
+    set(libzipSteps
+        BINARY_DIR "${CMAKE_BINARY_DIR}/libzip-prefix/src/libzip"
+        CONFIGURE_COMMAND "libtoolize"
+                  COMMAND "autoheader"
+                  COMMAND "aclocal"
+                  COMMAND "autoconf"
+                  COMMAND "automake" "--add-missing"
+                  COMMAND "./configure" "--prefix=${depsInstallPrefix}"
+    )
+endif()
+
 ExternalProject_Add(libzip
     DEPENDS "zlib"
     HG_REPOSITORY "http://hg.nih.at/libzip"
-    HG_TAG "rel-1-1-2"
+    HG_TAG "rel-1-1-3"
     PATCH_COMMAND "hg" "revert" "."
           COMMAND "hg" "import" "${CMAKE_SOURCE_DIR}/patches/libzip.patch"
             "--config" "patch.eol=auto" "--no-commit"
-    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:PATH=${depsInstallPrefix}"
+    ${libzipSteps}
     INSTALL_DIR "${depsInstallPrefix}"
 )
 
