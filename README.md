@@ -1,13 +1,14 @@
 Coral "super-project"
 =====================
 This repository contains [CMake](https://cmake.org) scripts for downloading,
-building and packaging Coral and (almost) all of its dependencies in just a
-few simple steps.
+building and packaging [Coral](https://github.com/viproma/coral) and (almost)
+all of its dependencies in just a few simple steps.
 
 Specifically, there are two scripts:
 
   * `CMakeLists.txt`, for downloading and building the code using CMake in
     the "normal mode".
+
   * `make-release.cmake`, for bundling Coral and its runtime dependencies into
     a release package.  This must be run by CMake in "script mode"
 
@@ -18,22 +19,26 @@ run the former in a temporary working directory.
 Requirements
 ------------
 The CMake "super build system" described by `CMakeLists.txt` automatically
-downloads and builds Coral and its dependencies by using CMake's
+downloads and builds Coral and most of its dependencies by using CMake's
 [ExternalProject](https://cmake.org/cmake/help/v3.0/module/ExternalProject.html)
-module.  For this to work, some tools must already be installed on your system:
+module.  There are some tools and libraries which must already be installed
+on your system, however:
 
   * CMake (3.0 or later)
   * [Git](https://git-scm.com/)
   * [Mercurial](https://www.mercurial-scm.org/) (required by dependencies)
   * [Subversion](https://subversion.apache.org/) (required by dependencies)
-  * [Boost](http://www.boost.org/) (can be downloaded automatically for Visual
-    Studio; see below)
-  * Java Development Kit (only required if you want to build JDSB, which
-    is not done by default)
+  * [Boost](http://www.boost.org/)
+
+In principle, we could download and build Boost like all the other dependencies,
+but it's so big, and takes so long to compile, that you probably wouldn't want
+that.  Most Linux distros let you install Boost easily through their package
+managers, and you'll find [Windows binaries available for download](
+https://sourceforge.net/projects/boost/files/boost-binaries/) on the web.
 
 The `make-release.cmake` script has no further *mandatory* dependencies of
-its own, but if you want it to create a ZIP file, you also need the Zip
-program by [Info-ZIP](http://www.info-zip.org/).
+its own, but if you want it to bundle everything into an archive file (e.g.
+ZIP), you need the appropriate programs for it.
 
 
 Downloading and building
@@ -61,6 +66,11 @@ check out the comments at the top of [`make-release.cmake`](make-release.cmake).
      See the CMake documentation as well as the list of variables
      below for what you can put in place of `[options]`.
 
+You'll now find the Coral source in a local Git repository under
+`BUILD_DIR/coral-prefix/src/coral`, and the generated project files or
+Makefiles under `BUILD_DIR/coral-prefix/src/coral-build`.
+
+
 Options and variables
 ---------------------
 
@@ -75,11 +85,14 @@ options on the form `-DVAR=value`.
   * `CORAL_GIT_TAG`: Which branch, tag or commit ID to check out from the Coral
     repository.  By default, this is `master`.
 
-  * `DOWNLOAD_BOOST`: Whether pre-built Boost libraries should be downloaded
-    from a SINTEF server.  This only works for Visual Studio builds, and by
-    default it is `OFF`.
+  * `CORAL_INSTALL_PREFIX`: Where to install Coral when the `install` target is
+    built.
 
-  * `BOOST_INCLUDEDIR` and `BOOST_LIBRARYDIR`: These are forwarded to CMake's
-    `FindBoost` script.  Run `cmake --help-module=FindBoost` for more info.
-    If `DOWNLOAD_BOOST` is `ON`, these are set automatically.
+  * `DEPENDENCY_INSTALL_PREFIX`: Where to install the dependencies when the
+    `install` target is built.
+
+  * `BOOST_ROOT`, `BOOST_INCLUDEDIR` and `BOOST_LIBRARYDIR`:
+    These are forwarded to the Coral build scripts and thereafter used by
+    CMake's `FindBoost` script.  Run `cmake --help-module FindBoost` for more
+    info.
 
