@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.0.0)
+#
 # This script creates a release bundle.
 #
 # USAGE
@@ -48,16 +50,21 @@
 #
 # FORWARDED VARIABLES
 #
-# These variables will be automatically forwarded to CMake during the
-# generation step if they are defined.
-#
-#   BOOST_INCLUDEDIR
-#   BOOST_LIBRARYDIR
-#   BOOST_ROOT
-#   CORAL_GIT_REPOSITORY
-#   CORAL_GIT_TAG
-#
-cmake_minimum_required(VERSION 3.0.0)
+# The following variables will be automatically forwarded to CMake during the
+# generation step if they are defined.  See README.md and Coral's own
+# CMakeLists.txt for more information.
+
+set(forwardedVariables
+    BOOST_INCLUDEDIR
+    BOOST_LIBRARYDIR
+    BOOST_ROOT
+    CORAL_BUILD_PRIVATE_API_DOCS
+    CORAL_BUILD_TESTS
+    CORAL_ENABLE_DEBUG_LOGGING
+    CORAL_ENABLE_TRACE_LOGGING
+    CORAL_GIT_REPOSITORY
+    CORAL_GIT_TAG
+)
 
 # ------------------------------------------------------------------------------
 # Executes a process and terminates the script if it fails.
@@ -74,16 +81,8 @@ function(executeProcess progName)
 endfunction()
 # ------------------------------------------------------------------------------
 
-
 set(packageName "coral")
 set(releaseDir "releases")
-set(forwardedVariables
-    BOOST_INCLUDEDIR
-    BOOST_LIBRARYDIR
-    BOOST_ROOT
-    CORAL_GIT_REPOSITORY
-    CORAL_GIT_TAG
-)
 
 if((NOT DEFINED releaseName) OR (releaseName STREQUAL ""))
     message(FATAL_ERROR "'releaseName' variable not defined")

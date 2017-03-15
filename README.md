@@ -96,3 +96,7 @@ options on the form `-DVAR=value`.
     CMake's `FindBoost` script.  Run `cmake --help-module FindBoost` for more
     info.
 
+  * `CORAL_BUILD_PRIVATE_API_DOCS`, `CORAL_BUILD_TESTS`,
+    `CORAL_ENABLE_DEBUG_LOGGING` and `CORAL_ENABLE_TRACE_LOGGING`:
+    These are forwarded to Coral's build scripts and affect how Coral is
+    built.  See Coral's CMakeLists.txt for more information.

@@ -27,16 +27,21 @@ set(BOOST_INCLUDEDIR "" CACHE PATH
 set(BOOST_LIBRARYDIR "" CACHE PATH
     "Preferred Boost library directory (e.g. <prefix>/lib)")
 
-set(boostCMakeArgs)
-if(BOOST_ROOT)
-    list(APPEND boostCMakeArgs "-DBOOST_ROOT:PATH=${BOOST_ROOT}")
-endif()
-if(BOOST_INCLUDEDIR)
-    list(APPEND boostCMakeArgs "-DBOOST_INCLUDEDIR:PATH=${BOOST_INCLUDEDIR}")
-endif()
-if(BOOST_LIBRARYDIR)
-    list(APPEND boostCMakeArgs "-DBOOST_LIBRARYDIR:PATH=${BOOST_LIBRARYDIR}")
-endif()
+set(forwardedVariables
+    BOOST_INCLUDEDIR
+    BOOST_LIBRARYDIR
+    BOOST_ROOT
+    CORAL_BUILD_PRIVATE_API_DOCS
+    CORAL_BUILD_TESTS
+    CORAL_ENABLE_DEBUG_LOGGING
+    CORAL_ENABLE_TRACE_LOGGING
+)
+unset(forwardedVariablesArgs)
+foreach(fv IN LISTS forwardedVariables)
+    if(DEFINED ${fv})
+        list(APPEND forwardedVariablesArgs "-D${fv}=${${fv}}")
+    endif()
+endforeach()
 
 
 # ==============================================================================
@@ -134,7 +139,7 @@ ExternalProject_Add(coral
         "-DCMAKE_INSTALL_PREFIX:PATH=${CORAL_INSTALL_PREFIX}"
         "-DCMAKE_PREFIX_PATH=${DEPENDENCY_INSTALL_PREFIX}"
         "-DCORAL_BUILD_PRIVATE_API_DOCS:BOOL=ON"
-        ${boostCMakeArgs}
+        ${forwardedVariablesArgs}
         "-DPROTOBUF_LIBRARY=${DEPENDENCY_INSTALL_PREFIX}/lib/${libprotobuf}"
         "-DPROTOBUF_LIBRARY_DEBUG=${DEPENDENCY_INSTALL_PREFIX}/lib/${libprotobufd}"
     INSTALL_DIR "${CORAL_INSTALL_PREFIX}"
