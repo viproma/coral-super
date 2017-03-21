@@ -86,7 +86,7 @@ ExternalProject_Add(libzip
 )
 
 ExternalProject_Add(fmilib
-    SVN_REPOSITORY "https://svn.jmodelica.org/FMILibrary/tags/2.0.1"
+    SVN_REPOSITORY "https://svn.jmodelica.org/FMILibrary/tags/2.0.2"
     CMAKE_ARGS
         "-DCMAKE_INSTALL_PREFIX:PATH=${DEPENDENCY_INSTALL_PREFIX}"
         "-DFMILIB_INSTALL_PREFIX:PATH=${DEPENDENCY_INSTALL_PREFIX}"
