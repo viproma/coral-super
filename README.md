@@ -1,16 +1,18 @@
 Coral "super-project"
 =====================
 This repository contains [CMake](https://cmake.org) scripts for downloading,
-building and packaging [Coral](https://github.com/viproma/coral) and (almost)
-all of its dependencies in just a few simple steps.
+building and packaging [Coral](https://github.com/viproma/coral),
+[JCoral](https://github.com/viproma/jcoral) and (almost) all of their
+dependencies in just a few simple steps.
 
 Specifically, there are two scripts:
 
   * `CMakeLists.txt`, for downloading and building the code using CMake in
-    the "normal mode".
+    the "normal" way.
 
-  * `make-release.cmake`, for bundling Coral and its runtime dependencies into
-    a release package.  This must be run by CMake in "script mode"
+  * `make-release.cmake`, for bundling Coral, JCoral and their runtime
+    dependencies into release packages.  This must be run by CMake in
+    "script mode".
 
 The latter will, unless otherwise is specified by the user, automatically
 run the former in a temporary working directory.
@@ -87,6 +89,12 @@ options on the form `-DVAR=value`.
 
   * `CORAL_INSTALL_PREFIX`: Where to install Coral when the `install` target is
     built.
+
+  * `BUILD_JCORAL`: Whether to also download and build the JCoral library.
+
+  * `JCORAL_GIT_REPOSITORY`, `JCORAL_GIT_TAG`, `JCORAL_INSTALL_PREFIX`: Same
+    as the corresponding `CORAL_*` variables, but for JCoral. Only used when
+    `BUILD_JCORAL` is `TRUE`.
 
   * `DEPENDENCY_INSTALL_PREFIX`: Where to install the dependencies when the
     `install` target is built.

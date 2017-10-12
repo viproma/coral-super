@@ -29,6 +29,10 @@ cmake_minimum_required(VERSION 3.0.0)
 #
 # OPTIONAL VARIABLES
 #
+#   jCoralReleaseName   A name for the JCoral release, typically a version
+#                       number or commit hash.  If this is not specified,
+#                       JCoral will not be built.
+#
 #   binaryDir           The path to an existing CMake binary directory from
 #                       which to  build the software.  If this is not specified,
 #                       the script will perform the CMake generation step in
@@ -65,6 +69,8 @@ set(forwardedVariables
     CORAL_GIT_REPOSITORY
     CORAL_GIT_TAG
     INSTALL_DEBUG_RUNTIME_LIBRARIES
+    JCORAL_GIT_REPOSITORY
+    JCORAL_GIT_TAG
 )
 
 # ------------------------------------------------------------------------------
@@ -80,6 +86,32 @@ function(executeProcess progName)
         message(FATAL_ERROR "${progName} terminated with exit status ${exitCode}")
     endif()
 endfunction()
+
+# Creates an archive file.
+function(package format baseName workingDir fileToAdd)
+    if(format STREQUAL "zip")
+        executeProcess("zip" "-r" "${baseName}.zip" "${fileToAdd}"
+            WORKING_DIRECTORY "${workingDir}")
+    elseif((format STREQUAL "tar") OR (format STREQUAL "tgz") OR (format STREQUAL "tbz"))
+        if(format STREQUAL "tgz")
+            set(tarCompression "-z")
+            set(tarSuffix ".gz")
+        elseif(format STREQUAL "tbz")
+            set(tarCompression "-j")
+            set(tarSuffix ".bz2")
+        else()
+            set(tarCompression)
+            set(tarSuffix)
+        endif()
+        executeProcess(
+            "tar" "-c" "-v" ${tarCompression} "-f" "${baseName}.tar${tarSuffix}" "${fileToAdd}"
+            WORKING_DIRECTORY "${workingDir}")
+    elseif(format STREQUAL "none")
+        message(STATUS "package format is 'none'; packaging skipped")
+    else()
+        message(SEND_ERROR "'${format}' is not a valid package format; packaging skipped")
+    endif()
+endfunction()
 # ------------------------------------------------------------------------------
 
 set(packageName "coral")
@@ -90,6 +122,10 @@ if((NOT DEFINED releaseName) OR (releaseName STREQUAL ""))
 endif()
 set(baseName "${packageName}_${releaseName}")
 
+if(jCoralReleaseName)
+    set(buildJCoral TRUE)
+    set(jCoralBaseName "jcoral_${jCoralReleaseName}")
+endif()
 
 # GENERATION STEP
 
@@ -115,6 +151,7 @@ if((NOT DEFINED binaryDir) OR (binaryDir STREQUAL ""))
             ${generatorArgs}
             ${forwardedVariablesArgs}
             "-DCMAKE_BUILD_TYPE=${configuration}"
+            "-DBUILD_JCORAL=${buildJCoral}"
             "${CMAKE_CURRENT_LIST_DIR}"
         WORKING_DIRECTORY "${binaryDir}"
     )
@@ -132,6 +169,7 @@ executeProcess("${CMAKE_COMMAND}"
 # BUNDLE CREATION STEP
 
 set(targetDir "${releaseDir}/${baseName}")
+set(jCoralTargetDir "${releaseDir}/${jCoralBaseName}")
 if(WIN32)
     set(dlDir "bin")
     set(dlExt ".dll")
@@ -146,6 +184,12 @@ endif()
 file(INSTALL "${binaryDir}/install/coral/"
     DESTINATION "${targetDir}"
     USE_SOURCE_PERMISSIONS)
+if(buildJCoral)
+    file(INSTALL "${binaryDir}/install/jcoral/"
+        DESTINATION "${jCoralTargetDir}"
+        USE_SOURCE_PERMISSIONS)
+endif()
+
 
 # Copy runtime dependencies
 set(depsDir "${binaryDir}/install/dependencies")
@@ -162,26 +206,7 @@ if((NOT DEFINED packager) OR (packager STREQUAL ""))
         set(packager "tgz")
     endif()
 endif()
-
-if(packager STREQUAL "zip")
-    executeProcess("zip" "-r" "${baseName}.zip" "${baseName}"
-        WORKING_DIRECTORY "${releaseDir}")
-elseif((packager STREQUAL "tar") OR (packager STREQUAL "tgz") OR (packager STREQUAL "tbz"))
-    if(packager STREQUAL "tgz")
-        set(tarCompression "-z")
-        set(tarSuffix ".gz")
-    elseif(packager STREQUAL "tbz")
-        set(tarCompression "-j")
-        set(tarSuffix ".bz2")
-    else()
-        set(tarCompression)
-        set(tarSuffix)
-    endif()
-    executeProcess(
-        "tar" "-c" "-v" ${tarCompression} "-f" "${baseName}.tar${tarSuffix}" "${baseName}"
-        WORKING_DIRECTORY "${releaseDir}")
-elseif(packager STREQUAL "none")
-    message(STATUS "packager is 'none'; packaging skipped")
-else()
-    message(SEND_ERROR "'${packager}' is not a valid packager; packaging skipped")
+package("${packager}" "${baseName}" "${releaseDir}" "${baseName}")
+if(buildJCoral)
+    package("${packager}" "${jCoralBaseName}" "${releaseDir}" "${jCoralBaseName}")
 endif()

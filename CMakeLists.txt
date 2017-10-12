@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.0.0)
 project("coral-super")
 
 set(CORAL_MAIN_GIT_REPOSITORY "https://github.com/viproma/coral.git")
+set(JCORAL_MAIN_GIT_REPOSITORY "https://github.com/viproma/jcoral.git")
 
 set(CORAL_GIT_REPOSITORY "${CORAL_MAIN_GIT_REPOSITORY}" CACHE STRING
     "The Coral repository URL. If you plan to develop Coral and submit pull requests, this should refer to your personal fork")
@@ -11,12 +12,24 @@ if(CORAL_GIT_REPOSITORY STREQUAL CORAL_MAIN_GIT_REPOSITORY)
     message(WARNING
         "CORAL_GIT_REPOSITORY currently points to the main Coral repository. If you plan to develop Coral and submit pull requests, you should change it so that it points to your personal fork.")
 endif()
-
 set(CORAL_GIT_TAG "master" CACHE STRING
     "The Git branch name, commit ID or tag to use when checking out Coral")
-
 set(CORAL_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/coral" CACHE PATH
     "Where to install Coral")
+
+if(BUILD_JCORAL)
+    set(JCORAL_GIT_REPOSITORY "${JCORAL_MAIN_GIT_REPOSITORY}" CACHE STRING
+        "The JCoral repository URL. If you plan to develop JCoral and submit pull requests, this should refer to your personal fork")
+    if(JCORAL_GIT_REPOSITORY STREQUAL JCORAL_MAIN_GIT_REPOSITORY)
+        message(WARNING
+            "JCORAL_GIT_REPOSITORY currently points to the main JCoral repository. If you plan to develop JCoral and submit pull requests, you should change it so that it points to your personal fork.")
+    endif()
+    set(JCORAL_GIT_TAG "master" CACHE STRING
+        "The Git branch name, commit ID or tag to use when checking out JCoral")
+    set(JCORAL_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/jcoral" CACHE PATH
+        "Where to install JCoral")
+endif()
+
 set(DEPENDENCY_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/dependencies" CACHE PATH
     "Where to install Coral dependencies")
 option(INSTALL_DEBUG_RUNTIME_LIBRARIES
@@ -157,3 +170,24 @@ ExternalProject_Add(coral
         "-DPROTOBUF_LIBRARY_DEBUG=${DEPENDENCY_INSTALL_PREFIX}/lib/${libprotobufd}"
     INSTALL_DIR "${CORAL_INSTALL_PREFIX}"
 )
+
+
+# ==============================================================================
+# JCoral
+# ==============================================================================
+
+if(BUILD_JCORAL)
+    ExternalProject_Add(jcoral
+        LIST_SEPARATOR "^"
+        GIT_REPOSITORY "${JCORAL_GIT_REPOSITORY}"
+        GIT_TAG "${JCORAL_GIT_TAG}"
+        DEPENDS "coral"
+        CMAKE_ARGS
+            "-DCMAKE_INSTALL_PREFIX:PATH=${JCORAL_INSTALL_PREFIX}"
+            "-DCMAKE_PREFIX_PATH=${CORAL_INSTALL_PREFIX}^${DEPENDENCY_INSTALL_PREFIX}"
+            ${forwardedVariablesArgs}
+            "-DPROTOBUF_LIBRARY=${DEPENDENCY_INSTALL_PREFIX}/lib/${libprotobuf}"
+            "-DPROTOBUF_LIBRARY_DEBUG=${DEPENDENCY_INSTALL_PREFIX}/lib/${libprotobufd}"
+        INSTALL_DIR "${JCORAL_INSTALL_PREFIX}"
+    )
+endif()
