@@ -91,6 +91,10 @@ options on the form `-DVAR=value`.
   * `DEPENDENCY_INSTALL_PREFIX`: Where to install the dependencies when the
     `install` target is built.
 
+  * `INSTALL_DEBUG_RUNTIME_LIBRARIES`: Whether to install the debug versions of
+    system runtime libraries along with other dependencies. (Currently only
+    applicable to the MSVC toolchain.)
+
   * `BOOST_ROOT`, `BOOST_INCLUDEDIR` and `BOOST_LIBRARYDIR`:
     These are forwarded to the Coral build scripts and thereafter used by
     CMake's `FindBoost` script.  Run `cmake --help-module FindBoost` for more

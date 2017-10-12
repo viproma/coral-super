@@ -19,6 +19,9 @@ set(CORAL_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/coral" CACHE PATH
     "Where to install Coral")
 set(DEPENDENCY_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/dependencies" CACHE PATH
     "Where to install Coral dependencies")
+option(INSTALL_DEBUG_RUNTIME_LIBRARIES
+    "Whether to install the debug versions of system runtime libraries along with other dependencies. (Currently only applicable to the MSVC toolchain.)"
+    OFF)
 
 set(BOOST_ROOT "" CACHE PATH
     "Preferred Boost installation prefix")
@@ -117,6 +120,16 @@ ExternalProject_Add(zmq
         "-DZMQ_BUILD_TESTS:BOOL=OFF"
     INSTALL_DIR "${DEPENDENCY_INSTALL_PREFIX}"
 )
+
+if(MSVC)
+    ExternalProject_Add("coral-super-crt-install"
+        URL "${CMAKE_SOURCE_DIR}/crt-install"
+        CMAKE_ARGS
+            "-DCMAKE_INSTALL_PREFIX:PATH=${DEPENDENCY_INSTALL_PREFIX}"
+            "-DCMAKE_INSTALL_DEBUG_LIBRARIES=${INSTALL_DEBUG_RUNTIME_LIBRARIES}"
+        INSTALL_DIR "${DEPENDENCY_INSTALL_PREFIX}"
+    )
+endif()
 
 
 # ==============================================================================

@@ -64,6 +64,7 @@ set(forwardedVariables
     CORAL_ENABLE_TRACE_LOGGING
     CORAL_GIT_REPOSITORY
     CORAL_GIT_TAG
+    INSTALL_DEBUG_RUNTIME_LIBRARIES
 )
 
 # ------------------------------------------------------------------------------
