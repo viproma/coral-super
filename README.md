@@ -28,7 +28,6 @@ on your system, however:
 
   * CMake (3.0 or later)
   * [Git](https://git-scm.com/)
-  * [Mercurial](https://www.mercurial-scm.org/) (required by dependencies)
   * [Subversion](https://subversion.apache.org/) (required by dependencies)
   * [Boost](http://www.boost.org/)
 
@@ -36,11 +35,12 @@ In principle, we could download and build Boost like all the other dependencies,
 but it's so big, and takes so long to compile, that you probably wouldn't want
 that.  Most Linux distros let you install Boost easily through their package
 managers, and you'll find [Windows binaries available for download](
-https://sourceforge.net/projects/boost/files/boost-binaries/) on the web.
+http://www.boost.org/users/download/) on the web.
 
 The `make-release.cmake` script has no further *mandatory* dependencies of
 its own, but if you want it to bundle everything into an archive file (e.g.
-ZIP), you need the appropriate programs for it.
+ZIP), you need the appropriate programs for it.  See the comments at the top
+of [`make-release.cmake`](make-release.cmake) for further information.
 
 
 Downloading and building
@@ -111,4 +111,5 @@ options on the form `-DVAR=value`.
   * `CORAL_BUILD_PRIVATE_API_DOCS`, `CORAL_BUILD_TESTS`,
     `CORAL_ENABLE_DEBUG_LOGGING` and `CORAL_ENABLE_TRACE_LOGGING`:
     These are forwarded to Coral's build scripts and affect how Coral is
-    built.  See Coral's CMakeLists.txt for more information.
+    built.  See [Coral's `CMakeLists.txt`](https://github.com/viproma/coral/blob/master/CMakeLists.txt)
+    for more information.
