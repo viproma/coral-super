@@ -92,11 +92,9 @@ endif()
 
 ExternalProject_Add(libzip
     DEPENDS "zlib"
-    HG_REPOSITORY "http://hg.nih.at/libzip"
-    HG_TAG "rel-1-1-3"
-    PATCH_COMMAND "hg" "revert" "."
-          COMMAND "hg" "import" "${CMAKE_SOURCE_DIR}/patches/libzip.patch"
-            "--config" "patch.eol=auto" "--no-commit"
+    GIT_REPOSITORY "https://github.com/nih-at/libzip.git"
+    GIT_TAG "rel-1-1-3"
+    PATCH_COMMAND "git" "apply" "${CMAKE_SOURCE_DIR}/patches/libzip.patch"
     ${libzipSteps}
     INSTALL_DIR "${DEPENDENCY_INSTALL_PREFIX}"
 )
