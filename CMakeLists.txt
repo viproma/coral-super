@@ -43,6 +43,10 @@ set(BOOST_INCLUDEDIR "" CACHE PATH
 set(BOOST_LIBRARYDIR "" CACHE PATH
     "Preferred Boost library directory (e.g. <prefix>/lib)")
 
+option(LIBZIP_USE_LIB_PREFIX_ON_WIN32
+    "Whether to add a 'lib' prefix to the libzip library files on Windows. This is a workaround for a name conflict with a DLL bundled with Oracle's JVM, and should only be relevant if Coral is used through the JNI (as in JCoral). Since this script builds JCoral too, the workaround is enabled by default."
+    ON)
+
 set(forwardedVariables
     BOOST_INCLUDEDIR
     BOOST_LIBRARYDIR
@@ -77,6 +81,7 @@ ExternalProject_Add(zlib
 if(WIN32)
     set(libzipSteps
         CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:PATH=${DEPENDENCY_INSTALL_PREFIX}"
+                   "-DUSE_LIB_PREFIX_ON_WIN32=${LIBZIP_USE_LIB_PREFIX_ON_WIN32}"
     )
 else()
     set(libzipSteps
@@ -94,7 +99,9 @@ ExternalProject_Add(libzip
     DEPENDS "zlib"
     GIT_REPOSITORY "https://github.com/nih-at/libzip.git"
     GIT_TAG "rel-1-1-3"
-    PATCH_COMMAND "git" "apply" "${CMAKE_SOURCE_DIR}/patches/libzip.patch"
+    PATCH_COMMAND "git" "apply" "${CMAKE_SOURCE_DIR}/patches/libzip/define-snprintf.patch"
+                                "${CMAKE_SOURCE_DIR}/patches/libzip/dll-prefix-workaround.patch"
+                                "${CMAKE_SOURCE_DIR}/patches/libzip/fix-manfmt.patch"
     ${libzipSteps}
     INSTALL_DIR "${DEPENDENCY_INSTALL_PREFIX}"
 )

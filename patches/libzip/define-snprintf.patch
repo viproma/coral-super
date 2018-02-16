@@ -1,0 +1,15 @@
+diff --git a/src/ziptool.c b/src/ziptool.c
+index 062267e..36bd028 100644
+--- a/src/ziptool.c
++++ b/src/ziptool.c
+@@ -53,6 +53,10 @@ extern int optopt;
+ #include "zip.h"
+ #include "compat.h"
+ 
++#if defined(_MSC_VER) && (_MSC_VER < 1900)
++#define snprintf _snprintf
++#endif
++
+ zip_source_t *source_hole_create(const char *, int flags, zip_error_t *);
+ 
+ typedef enum {
