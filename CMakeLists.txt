@@ -131,7 +131,8 @@ ExternalProject_Add(protobuf
 )
 
 ExternalProject_Add(zmq
-    GIT_REPOSITORY "https://github.com/zeromq/zeromq4-1.git"
+    GIT_REPOSITORY "https://github.com/zeromq/libzmq.git"
+    GIT_TAG "v4.2.5"
     CMAKE_ARGS
         "-DCMAKE_INSTALL_PREFIX:PATH=${DEPENDENCY_INSTALL_PREFIX}"
         "-DWITH_LIBSODIUM:BOOL=OFF"
