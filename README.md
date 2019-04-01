@@ -1,5 +1,10 @@
 Coral "super-project"
 =====================
+
+**WARNING: This repository is no longer maintained, and is therefore not
+guaranteed to work with recent versions of Coral. Consider using vcpkg or
+some other package manager instead.**
+
 This repository contains [CMake](https://cmake.org) scripts for downloading,
 building and packaging [Coral](https://github.com/viproma/coral),
 [JCoral](https://github.com/viproma/jcoral) and (almost) all of their
